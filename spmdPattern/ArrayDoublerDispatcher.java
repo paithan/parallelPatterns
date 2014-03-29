@@ -1,9 +1,14 @@
-import java.util.Vector;
-
-/**
+/*
  * File: ArrayDoublerDispatcher
  * User: djskrien
  * Date: 3/29/14
+ */
+
+import java.util.Vector;
+
+/**
+ * Its service method takes an array of integers as data and doubles all
+ * the values in the array in place.
  */
 public class ArrayDoublerDispatcher
     extends AbstractDispatcher<ArrayDoublerDispatcher.ArrayAnd2Ints,int[],int[],int[]>

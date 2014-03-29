@@ -2,7 +2,7 @@
 
 /**
  * This represents an AbstractDispatcher for the SPMD Design Pattern.
- * @author Kyle Burke
+ * @author Kyle Burke & Dale Skrien
  */
 public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorkers,
         InputType, OutputType> {
@@ -22,7 +22,7 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
      * Performs a calculation.
      *
      * @param input  The data for the calculation.
-     * @param numberOfWorkers the number of processors that will be used.
+     * @param numberOfWorkers the number of processors to use.
      * @return  The result of the calculation.
      */
     public OutputType service(InputType input, int numberOfWorkers) {
@@ -43,14 +43,14 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
     }
 
 
-    //private methods
+    //non-public methods
 
     /**
      * Breaks down the data into different objects, which will be individually passed
      * to workers.  This initializes the aggregateData field.
      *
      * @param input  The data to be divided into separate pieces.
-     * @param numberOfWorkers the number of processors that will be used.
+     * @param numberOfWorkers the number of processors to use.
      */
     protected abstract void splitWork(InputType input, int numberOfWorkers);
 
@@ -61,7 +61,9 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
      */
     protected abstract OutputType combineResults();
 
-    // Calls the workers, filling in the output fields of this.aggregateData.
+    /**
+     *  Calls the workers, filling in the output fields of this.aggregateData.
+     */
     private void callWorkers() {
         //create and run the workers using new threads
         for (PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers> capsule :
@@ -80,8 +82,11 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
         }
     }
 
-    //Returns whether the workers have all finished.  Important: Don't call this
-    // function until after callWorkers has been invoked!
+    /**
+     * Returns whether the workers have all finished.
+     * Important: Don't call this function until after callWorkers has been invoked!
+     * @return true if all workers have finished.
+    */
     private boolean areWorkersDone() {
         for (PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers> capsule :
                 this.aggregateData) {

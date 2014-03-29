@@ -37,6 +37,9 @@ public class IntArrayMapper
         return ((Vector<PairCapsule<Range, int[]>>)this.aggregateData).get(0).getOutput();
     }
 
+    /**
+     * Unit test
+     */
     public static void main(String[] args) {
         // double all the values in the array
         Command<Integer,Integer> times2 = new Command<Integer, Integer>() {
