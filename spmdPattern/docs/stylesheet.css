@@ -212,7 +212,7 @@ ul.inheritance li {
 }
 ul.inheritance li ul.inheritance {
     margin-left:15px;
-    background-image:url(resources/inherit.gif);
+    background-image:url(../resources/inherit.gif);
     background-repeat:no-repeat;
     padding-left:15px;
     padding-top:1px;
