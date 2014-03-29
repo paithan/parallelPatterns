@@ -9,7 +9,6 @@ import java.util.*;
 public class MatrixMultDispatcher
         extends AbstractDispatcher<MatrixMultDispatcher.TwoMatricesAndInteger,
                                    int[], MatrixMultDispatcher.TwoMatrices,int[][]> {
-    private int matrixLength;
 
     //constructors
     /**
@@ -26,24 +25,28 @@ public class MatrixMultDispatcher
 
     //protected methods
 
-    protected void splitWork(TwoMatrices input, int numberOfWorkers) {
+    protected Iterable<PairCapsule<TwoMatricesAndInteger, int[]>> splitWork(
+            TwoMatrices input, int numberOfWorkers) {
         // ignores the numberOfWorkers and instead uses a worker for each
         // entry in the product matrix.
-        this.matrixLength = input.leftMatrix.length;
-        this.aggregateData = new Vector<PairCapsule<TwoMatricesAndInteger, int[]>>();
+        Iterable<PairCapsule<TwoMatricesAndInteger, int[]>> aggregateData =
+                new Vector<PairCapsule<TwoMatricesAndInteger, int[]>>();
         for (int i = 0; i< input.rightMatrix.length; i++) {
-            ((Vector<PairCapsule<TwoMatricesAndInteger, int[]>>) this.aggregateData).add(
+            ((Vector<PairCapsule<TwoMatricesAndInteger, int[]>>) aggregateData).add(
                     new PairCapsule<TwoMatricesAndInteger, int[]>(
                             new TwoMatricesAndInteger(input.leftMatrix,
                                     input.rightMatrix, i)
                     ));
         }
+        return aggregateData;
     }
 
-    protected int[][] combineResults() {
-        int[][] productMatrix = new int[matrixLength][0];
+    protected int[][] combineResults(Iterable<PairCapsule<TwoMatricesAndInteger, int[]>>
+                                     aggregateData) {
+        int[][] productMatrix =
+                 new int[aggregateData.iterator().next().getOutput().length][0];
         int i = 0;
-        for (PairCapsule<TwoMatricesAndInteger,int[]> capsule : this.aggregateData) {
+        for (PairCapsule<TwoMatricesAndInteger,int[]> capsule : aggregateData) {
             productMatrix[i] = capsule.getOutput();
             i++;
         }

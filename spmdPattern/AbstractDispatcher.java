@@ -11,9 +11,7 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
 
     //instance variables
 
-    //holds the data returned by the workers
-    protected Iterable<PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers>> aggregateData;
-    //the command to send to the workers
+   //the command to send to the workers
     protected Command<TypeSentToWorkers, TypeReturnedByWorkers> workerCommand;
 
     //public methods
@@ -26,9 +24,7 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
      * @return  The result of the calculation.
      */
     public OutputType service(InputType input, int numberOfWorkers) {
-        this.splitWork(input, numberOfWorkers);
-        this.callWorkers();
-        return this.combineResults();
+        return this.combineResults(callWorkers(splitWork(input, numberOfWorkers)));
     }
 
     /**
@@ -52,34 +48,42 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
      * @param input  The data to be divided into separate pieces.
      * @param numberOfWorkers the number of processors to use.
      */
-    protected abstract void splitWork(InputType input, int numberOfWorkers);
+    protected abstract Iterable<PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers>>
+        splitWork(InputType input, int numberOfWorkers);
 
     /**
      * Combines the collected data to perform the final calculation.
      *
      * @return  The result of the overall calculation.
      */
-    protected abstract OutputType combineResults();
+    protected abstract OutputType combineResults(
+            Iterable<PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers>> aggregateData
+    );
 
     /**
      *  Calls the workers, filling in the output fields of this.aggregateData.
      */
-    private void callWorkers() {
+    private Iterable<PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers>>
+       callWorkers(
+            Iterable<PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers>>
+                aggregateData) {
         //create and run the workers using new threads
         for (PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers> capsule :
-                this.aggregateData) {
+                aggregateData) {
             Worker<TypeSentToWorkers, TypeReturnedByWorkers> worker =
-                    new Worker<TypeSentToWorkers, TypeReturnedByWorkers>(this.workerCommand, capsule);
+                    new Worker<TypeSentToWorkers, TypeReturnedByWorkers>(
+                            this.workerCommand, capsule);
             new Thread(worker).start();
         }
         //now wait for all the workers to finish
         try {
-            while(!this.areWorkersDone()) {
+            while(!this.areWorkersDone(aggregateData)) {
                 Thread.sleep(500);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return aggregateData;
     }
 
     /**
@@ -87,9 +91,10 @@ public abstract class AbstractDispatcher<TypeSentToWorkers, TypeReturnedByWorker
      * Important: Don't call this function until after callWorkers has been invoked!
      * @return true if all workers have finished.
     */
-    private boolean areWorkersDone() {
+    private boolean areWorkersDone(
+            Iterable<PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers>> aggregateData) {
         for (PairCapsule<TypeSentToWorkers, TypeReturnedByWorkers> capsule :
-                this.aggregateData) {
+                aggregateData) {
             if (!capsule.hasOutput()) {
                 return false;
             }

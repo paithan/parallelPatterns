@@ -16,8 +16,7 @@ public class StringConcatenationDispatcher extends AbstractDispatcher<String, St
 	public StringConcatenationDispatcher() {
 	    this.workerCommand = new Command<String, String>() {
             public String execute(String input) {
-                String output = input + input.toUpperCase() + input;
-                return output;
+                return input + input.toUpperCase() + input;
             }
         };
 	}
@@ -25,18 +24,21 @@ public class StringConcatenationDispatcher extends AbstractDispatcher<String, St
 	//protected methods
     
     
-    protected void splitWork(String input, int numberOfWorkers) {
+    protected Iterable<PairCapsule<String, String>> splitWork(String input,
+                                                              int numberOfWorkers) {
         // ignores the number of workers and uses one worker per character
-        this.aggregateData = new Vector<PairCapsule<String, String>>();
+        Iterable<PairCapsule<String, String>> aggregateData =
+                                                new Vector<PairCapsule<String, String>>();
         for (int i = 0; i< input.length(); i++) {
-            ((Vector<PairCapsule<String, String>>) this.aggregateData).add(new PairCapsule<String, String>(input.substring(i, i+1)));
+            ((Vector<PairCapsule<String, String>>) aggregateData).add(new PairCapsule<String, String>(input.substring(i, i + 1)));
         }
+        return aggregateData;
     }
     
     
-    protected String combineResults() {
-        StringBuffer buffer = new StringBuffer();
-        for (PairCapsule<String, String> capsule : this.aggregateData) {
+    protected String combineResults(Iterable<PairCapsule<String, String>> aggregateData) {
+        StringBuilder buffer = new StringBuilder();
+        for (PairCapsule<String, String> capsule : aggregateData) {
             buffer.append(capsule.getOutput());
         }
         return buffer.toString();

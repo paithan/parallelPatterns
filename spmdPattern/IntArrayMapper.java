@@ -21,20 +21,22 @@ public class IntArrayMapper
     }
 
     @Override
-    protected void splitWork(int[] input, int numberOfWorkers) {
-        this.aggregateData = new Vector<PairCapsule<Range, int[]>>(numberOfWorkers);
+    protected Iterable<PairCapsule<Range,int[]>> splitWork(int[] input, int numberOfWorkers) {
+        Iterable<PairCapsule<Range,int[]>> aggregateData =
+                new Vector<PairCapsule<Range, int[]>>(numberOfWorkers);
         for(int i = 0; i < numberOfWorkers; i++) {
-            ((Vector<PairCapsule<Range, int[]>>) this.aggregateData).add(
+            ((Vector<PairCapsule<Range, int[]>>) aggregateData).add(
                     new PairCapsule<Range, int[]>(
-                            new Range(i*input.length/numberOfWorkers,
-                                    (i+1)*input.length/numberOfWorkers,
+                            new Range(i * input.length / numberOfWorkers,
+                                    (i + 1) * input.length / numberOfWorkers,
                                     input)));
         }
+        return aggregateData;
     }
 
     @Override
-    protected int[] combineResults() {
-        return ((Vector<PairCapsule<Range, int[]>>)this.aggregateData).get(0).getOutput();
+    protected int[] combineResults(Iterable<PairCapsule<Range,int[]>> aggregateData) {
+        return aggregateData.iterator().next().getOutput();
     }
 
     /**

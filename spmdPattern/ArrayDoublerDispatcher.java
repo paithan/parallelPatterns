@@ -11,14 +11,13 @@ import java.util.Vector;
  * the values in the array in place.
  */
 public class ArrayDoublerDispatcher
-    extends AbstractDispatcher<ArrayDoublerDispatcher.ArrayAnd2Ints,int[],int[],int[]>
+    extends AbstractDispatcher<ArrayDoublerDispatcher.Range,int[],int[],int[]>
 {
-    private int[] data;
 
     public ArrayDoublerDispatcher() {
-        this.workerCommand = new Command<ArrayAnd2Ints, int[]>() {
+        this.workerCommand = new Command<Range, int[]>() {
             @Override
-            public int[] execute(ArrayAnd2Ints input) {
+            public int[] execute(Range input) {
                 for(int i = input.start; i < input.end; i++) {
                     input.data[i] = 2*input.data[i];
                 }
@@ -28,21 +27,22 @@ public class ArrayDoublerDispatcher
     }
 
     @Override
-    protected void splitWork(int[] input, int numberOfWorkers) {
-        this.data = input;
-        this.aggregateData = new Vector<PairCapsule<ArrayAnd2Ints, int[]>>(numberOfWorkers);
+    protected Iterable<PairCapsule<Range,int[]>> splitWork(int[] input, int numberOfWorkers) {
+        Iterable<PairCapsule<Range,int[]>> aggregateData =
+                              new Vector<PairCapsule<Range, int[]>>(numberOfWorkers);
         for(int i = 0; i < numberOfWorkers; i++) {
-            ((Vector<PairCapsule<ArrayAnd2Ints, int[]>>) this.aggregateData).add(
-                new PairCapsule<ArrayAnd2Ints, int[]>(
-                    new ArrayAnd2Ints(i*input.length/numberOfWorkers,
-                            (i+1)*input.length/numberOfWorkers,
-                            input)));
+            ((Vector<PairCapsule<Range, int[]>>) aggregateData).add(
+                    new PairCapsule<Range, int[]>(
+                            new Range(i * input.length / numberOfWorkers,
+                                    (i + 1) * input.length / numberOfWorkers,
+                                    input)));
         }
+        return aggregateData;
     }
 
     @Override
-    protected int[] combineResults() {
-        return data;
+    protected int[] combineResults(Iterable<PairCapsule<Range, int[]>> aggregateData) {
+        return aggregateData.iterator().next().getOutput();
     }
 
     public static void main(String[] args) {
@@ -55,11 +55,11 @@ public class ArrayDoublerDispatcher
     }
     //------------- static inner class -------------
 
-    public class ArrayAnd2Ints {
+    public class Range {
         public int start, end;
         public int[] data;
 
-        public ArrayAnd2Ints(int s, int e, int[] d) {
+        public Range(int s, int e, int[] d) {
             this.start = s; this.end = e; this.data = d;
         }
     }
