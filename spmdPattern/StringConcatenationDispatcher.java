@@ -25,7 +25,8 @@ public class StringConcatenationDispatcher extends AbstractDispatcher<String, St
 	//protected methods
     
     
-    protected void splitWork(String input) {
+    protected void splitWork(String input, int numberOfWorkers) {
+        // ignores the number of workers and uses one worker per character
         this.aggregateData = new Vector<PairCapsule<String, String>>();
         for (int i = 0; i< input.length(); i++) {
             ((Vector<PairCapsule<String, String>>) this.aggregateData).add(new PairCapsule<String, String>(input.substring(i, i+1)));
